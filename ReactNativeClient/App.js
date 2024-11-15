@@ -8,7 +8,6 @@
 
 import React from 'react';
 import IssueList from './IssueList.js';
-import type {Node} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -27,6 +26,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import Toast, {BaseToast, ErrorToast} from 'react-native-toast-message';
+
 // Add styles for the title
 const styles = StyleSheet.create({
   appTitle: {
@@ -48,12 +48,8 @@ const styles = StyleSheet.create({
   },
 });
 
-// Create config for the toast message
+// Create styling config for the toast message
 const toastConfig = {
-  /*
-    Overwrite 'success' type,
-    by modifying the existing `BaseToast` component
-  */
   success: props => (
     <BaseToast
       {...props}
@@ -67,10 +63,6 @@ const toastConfig = {
       }}
     />
   ),
-  /*
-    Overwrite 'error' type,
-    by modifying the existing `ErrorToast` component
-  */
   error: props => (
     <ErrorToast
       {...props}
@@ -85,6 +77,7 @@ const toastConfig = {
   ),
 };
 
+// Main App component
 export default class App extends React.Component {
   render() {
     return (
