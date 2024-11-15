@@ -65,9 +65,7 @@ class IssueFilter extends React.Component {
     return (
       <View>
         {/****** Q1: Start Coding here. ******/}
-        <Text style={styles.filterPlaceholder}>
-          This is a placeholder for the issue filter
-        </Text>
+        <Text style={styles.filterPlaceholder}>Issue Filter Placeholder</Text>
         {/****** Q1: Code ends here ******/}
       </View>
     );
@@ -208,9 +206,10 @@ const styles = StyleSheet.create({
   icon: {fontSize: 24},
 });
 
-// Convert the width to percentage
+// Width in percentages for each column in the table
 const widthP = ['5%', '15%', '15%', '17.5%', '12.5%', '12.5%', '22.5%'];
 
+// Component for rendering a row in the issues table
 function IssueRow(props) {
   const issue = props.issue;
   {
@@ -245,7 +244,9 @@ function IssueRow(props) {
   );
 }
 
+// Component for rendering the issues table
 function IssueTable(props) {
+  // Map each issue to a row in the table
   const issueRows = props.issues.map(issue => (
     <IssueRow key={issue.id} issue={issue} />
   ));
@@ -253,6 +254,7 @@ function IssueTable(props) {
   {
     /****** Q2: Start Coding here. Add Logic to initalize table header  ******/
   }
+  // Create the variable with the labels for the table header
   const tableHeader = [
     'ID',
     'Status',
@@ -285,11 +287,13 @@ function IssueTable(props) {
   );
 }
 
+// Add Issue Component
 class IssueAdd extends React.Component {
   constructor() {
     super();
     this.handleSubmit = this.handleSubmit.bind(this);
     /****** Q3: Start Coding here. Create State to hold inputs******/
+    // Initialize the state variables for the add issue form
     this.state = {
       owner: '',
       status: 'New',
@@ -303,10 +307,12 @@ class IssueAdd extends React.Component {
   }
 
   /****** Q3: Start Coding here. Add functions to hold/set state input based on changes in TextInput******/
+  // Function to handle changes in the text input fields
   handleTextInputChange(text, field) {
     this.setState({[field]: text});
   }
 
+  // Function to handle changes in the picker field (dropdown)
   handlePickerChange(itemValue) {
     this.setState({status: itemValue});
   }
@@ -314,7 +320,7 @@ class IssueAdd extends React.Component {
 
   async handleSubmit() {
     /****** Q3: Start Coding here. Create an issue from state variables and call createIssue. Also, clear input field in front-end******/
-    // Input validation (perform the same validation as the backend to mimic the logic)
+    // Input validation (perform the same validation as the backend server to mimic the logic)
     // Check if the title is less than 3 characters long
     if (this.state.title.length < 3) {
       Toast.show({
@@ -345,8 +351,8 @@ class IssueAdd extends React.Component {
       });
       return;
     }
-    // Check that the month is between 1 and 12
     const dateParts = this.state.due.split('-');
+    // Check that the month is between 1 and 12
     if (dateParts[1] < 1 || dateParts[1] > 12) {
       Toast.show({
         type: 'error',
@@ -366,9 +372,9 @@ class IssueAdd extends React.Component {
       });
       return;
     }
-    // Get the date object
+    // Convert the date string to a date object
     const processedDate = jsonDateReviver('', this.state.due);
-    // Check if the date object was obtained
+    // Check if the date object was obtained. If it remains a string, the date was invalid
     if (processedDate === this.state.due) {
       Toast.show({
         type: 'error',
@@ -379,7 +385,7 @@ class IssueAdd extends React.Component {
       return;
     }
 
-    // Check that the effort is a number
+    // Check that the effort is a number and the field is not empty
     if (this.state.effort === '' || isNaN(Number(this.state.effort))) {
       Toast.show({
         type: 'error',
@@ -390,6 +396,7 @@ class IssueAdd extends React.Component {
       return;
     }
 
+    // Create the issue object from the state variables to be sent to the server
     const issue = {
       owner: this.state.owner,
       status: this.state.status,
@@ -398,8 +405,10 @@ class IssueAdd extends React.Component {
       title: this.state.title,
     };
 
+    // Call the createIssue function to add the issue to the database via the GraphQL server
     const data = await this.props.createIssue(issue);
 
+    // Display a success message if the issue was added successfully (if an ID was returned)
     if (data.issueAdd.id) {
       Toast.show({
         type: 'success',
@@ -408,7 +417,7 @@ class IssueAdd extends React.Component {
         visibilityTime: 2000,
       });
 
-      // Clear the form
+      // Clear the form if the issue was added successfully
       this.setState({
         owner: '',
         status: 'New',
@@ -503,11 +512,13 @@ class BlackList extends React.Component {
     super();
     this.handleSubmit = this.handleSubmit.bind(this);
     /****** Q4: Start Coding here. Create State to hold inputs******/
+    // Have checked with Prof that it is ok to use owner, despite the possibility of duplicate names
     this.state = {owner: ''};
     this.handleTextInputChange = this.handleTextInputChange.bind(this);
     /****** Q4: Code Ends here. ******/
   }
   /****** Q4: Start Coding here. Add functions to hold/set state input based on changes in TextInput******/
+  // Function to handle changes in the text input field
   handleTextInputChange(text) {
     this.setState({owner: text});
   }
@@ -515,6 +526,7 @@ class BlackList extends React.Component {
 
   async handleSubmit() {
     /****** Q4: Start Coding here. Create an issue from state variables and issue a query. Also, clear input field in front-end******/
+    // Check that the owner name is not empty
     if (this.state.owner === '') {
       Toast.show({
         type: 'error',
@@ -525,12 +537,15 @@ class BlackList extends React.Component {
       return;
     }
 
+    // Create the GraphQL mutation to add the owner to the blacklist
     const mutation = `mutation addToBacklist($nameInput: String!) {
       addToBlacklist(nameInput: $nameInput)
     }`;
 
+    // Send the mutation to the server to add the owner to the blacklist
     await graphQLFetch(mutation, {nameInput: this.state.owner});
 
+    // Display a success message if the owner was added to the blacklist
     Toast.show({
       type: 'success',
       text1: 'Blacklist',
@@ -538,6 +553,7 @@ class BlackList extends React.Component {
       visibilityTime: 2000,
     });
 
+    // Clear the input field after the owner has been blacklisted
     this.setState({owner: ''});
     /****** Q4: Code Ends here. ******/
   }
@@ -546,7 +562,6 @@ class BlackList extends React.Component {
     return (
       <View style={[styles.container, styles.form]}>
         {/****** Q4: Start Coding here. Create TextInput field, populate state variables. Create a submit button, and on submit, trigger handleSubmit.*******/}
-        {/* link for making form required: https://stackoverflow.com/questions/51665162/how-can-i-make-a-textfield-in-react-native-required */}
         <Text style={styles.title}>Blacklist Owner</Text>
         <View>
           <Text style={styles.label}>Owner</Text>
@@ -621,6 +636,7 @@ export default class IssueList extends React.Component {
       <>
         <ScrollView contentContainerStyle={styles.scrollViewContainer}>
           {/****** Q1: Start Coding here. ******/}
+          {/* Only render the issue filter with the table in the table tab (which makes sense) */}
           {this.state.view === 'table' && <IssueFilter />}
           {/****** Q1: Code ends here ******/}
 
@@ -641,7 +657,7 @@ export default class IssueList extends React.Component {
           {/****** Q4: Code Ends here. ******/}
         </ScrollView>
 
-        {/* Navbar */}
+        {/* Navbar with Issues Table, Add Issue and Blacklist tabs */}
         <View style={[styles.navBar]}>
           <Pressable
             style={[
